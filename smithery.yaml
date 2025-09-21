@@ -1,6 +1,1 @@
-# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
-
-dockerfile: Dockerfile
-entrypoint: build/smithery-entry.js
-
 runtime: "typescript"
