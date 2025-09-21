@@ -12,7 +12,8 @@
     "README.md",
     "LICENSE",
     "Dockerfile",
-    "smithery.yaml"
+    "smithery.yaml",
+    "package-lock.json"
   ],
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
