@@ -15,7 +15,7 @@ import { z } from "zod";
 // Export configuration schema for Smithery
 export const configSchema = z.object({
   clickupApiKey: z.string().describe("Your ClickUp API key"),
-  clickupTeamId: z.string().describe("Your ClickUp Team ID"),
+  clickupTeamId: z.union([z.string(), z.number()]).transform(val => String(val)).describe("Your ClickUp Team ID"),
 });
 
 // Export default function that Smithery expects
@@ -23,7 +23,7 @@ export default function createServer({ config: smitheryConfig }) {
   // Set environment variables from Smithery config
   if (smitheryConfig) {
     process.env.CLICKUP_API_KEY = smitheryConfig.clickupApiKey;
-    process.env.CLICKUP_TEAM_ID = smitheryConfig.clickupTeamId;
+    process.env.CLICKUP_TEAM_ID = String(smitheryConfig.clickupTeamId);
     process.env.ENABLE_SSE = "true"; // Enable SSE for Smithery
   } else {
     // For Smithery capability scanning, provide dummy values if not configured
@@ -63,7 +63,7 @@ export default function createServer({ config: smitheryConfig }) {
     sslCertPath: config.sslCertPath,
     sslCaPath: config.sslCaPath,
   };
-  
+
   // Only validate if we have real credentials (not scan mode)
   if (smitheryConfig && smitheryConfig.clickupApiKey !== "scan_mode") {
     validateConfig(currentConfig);

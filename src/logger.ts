@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: MIT
  *
  * Logger module for MCP Server
- * 
+ *
  * This module provides logging functionality for the server,
  * writing logs to only the log file to avoid interfering with JSON-RPC.
  */
 
-import { createWriteStream } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import config, { LogLevel } from './config.js';
+import { createWriteStream } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import config, { LogLevel } from "./config.js";
 
 // Get the directory name of the current module - compatible with both ESM and CJS
 const getDirectoryName = () => {
@@ -30,8 +30,10 @@ const __dirname = getDirectoryName();
 const pid = process.pid;
 
 // Create a write stream for logging - use a fixed filename in the build directory
-const logFileName = 'server.log';
-const logStream = createWriteStream(join(__dirname, logFileName), { flags: 'w' });
+const logFileName = "server.log";
+const logStream = createWriteStream(join(__dirname, logFileName), {
+  flags: "w",
+});
 // Write init message to log file only
 logStream.write(`Logging initialized to ${join(__dirname, logFileName)}\n`);
 
@@ -56,50 +58,74 @@ function isLevelEnabled(level: LogLevel): boolean {
  * @param message Message to log
  * @param data Optional data to include in log
  */
-function log(level: 'trace' | 'debug' | 'info' | 'warn' | 'error', message: string, data?: any) {
-  const levelEnum = level === 'trace' ? LogLevel.TRACE 
-    : level === 'debug' ? LogLevel.DEBUG
-    : level === 'info' ? LogLevel.INFO
-    : level === 'warn' ? LogLevel.WARN 
-    : LogLevel.ERROR;
-  
+function log(
+  level: "trace" | "debug" | "info" | "warn" | "error",
+  message: string,
+  data?: any
+) {
+  const levelEnum =
+    level === "trace"
+      ? LogLevel.TRACE
+      : level === "debug"
+      ? LogLevel.DEBUG
+      : level === "info"
+      ? LogLevel.INFO
+      : level === "warn"
+      ? LogLevel.WARN
+      : LogLevel.ERROR;
+
   // Skip if level is below configured level
   if (!isLevelEnabled(levelEnum)) {
     return;
   }
-  
+
   const timestamp = new Date().toISOString();
-  
+
   // Format the log message differently based on the level and data
   let logMessage = `[${timestamp}] [PID:${pid}] ${level.toUpperCase()}: ${message}`;
-  
+
   // Format data differently based on content and log level
   if (data) {
     // For debugging and trace levels, try to make the data more readable
-    if (level === 'debug' || level === 'trace') {
+    if (level === "debug" || level === "trace") {
       // If data is a simple object with few properties, format it inline
-      if (typeof data === 'object' && data !== null && !Array.isArray(data) && 
-          Object.keys(data).length <= 4 && Object.keys(data).every(k => 
-            typeof data[k] !== 'object' || data[k] === null)) {
+      if (
+        typeof data === "object" &&
+        data !== null &&
+        !Array.isArray(data) &&
+        Object.keys(data).length <= 4 &&
+        Object.keys(data).every(
+          (k) => typeof data[k] !== "object" || data[k] === null
+        )
+      ) {
         const dataStr = Object.entries(data)
-          .map(([k, v]) => `${k}=${v === undefined ? 'undefined' : 
-            (v === null ? 'null' : 
-              (typeof v === 'string' ? `"${v}"` : v))}`)
-          .join(' ');
-        
+          .map(
+            ([k, v]) =>
+              `${k}=${
+                v === undefined
+                  ? "undefined"
+                  : v === null
+                  ? "null"
+                  : typeof v === "string"
+                  ? `"${v}"`
+                  : v
+              }`
+          )
+          .join(" ");
+
         logMessage += ` (${dataStr})`;
       } else {
         // For more complex data, keep the JSON format but on new lines
-        logMessage += '\n' + JSON.stringify(data, null, 2);
+        logMessage += "\n" + JSON.stringify(data, null, 2);
       }
     } else {
       // For other levels, keep the original JSON format
-      logMessage += '\n' + JSON.stringify(data, null, 2);
+      logMessage += "\n" + JSON.stringify(data, null, 2);
     }
   }
 
   // Write to file only, not to stderr which would interfere with JSON-RPC
-  logStream.write(logMessage + '\n');
+  logStream.write(logMessage + "\n");
 }
 
 /**
@@ -108,7 +134,7 @@ function log(level: 'trace' | 'debug' | 'info' | 'warn' | 'error', message: stri
  * @param data Optional data to include in log
  */
 export function info(message: string, data?: any) {
-  log('info', message, data);
+  log("info", message, data);
 }
 
 /**
@@ -117,7 +143,7 @@ export function info(message: string, data?: any) {
  * @param data Optional data to include in log
  */
 export function error(message: string, data?: any) {
-  log('error', message, data);
+  log("error", message, data);
 }
 
 /**
@@ -149,7 +175,7 @@ export class Logger {
    * @param data Optional data to include in log
    */
   trace(message: string, data?: any) {
-    log('trace', `[${this.context}] ${message}`, data);
+    log("trace", `[${this.context}] ${message}`, data);
   }
 
   /**
@@ -158,7 +184,7 @@ export class Logger {
    * @param data Optional data to include in log
    */
   debug(message: string, data?: any) {
-    log('debug', `[${this.context}] ${message}`, data);
+    log("debug", `[${this.context}] ${message}`, data);
   }
 
   /**
@@ -167,7 +193,7 @@ export class Logger {
    * @param data Optional data to include in log
    */
   info(message: string, data?: any) {
-    log('info', `[${this.context}] ${message}`, data);
+    log("info", `[${this.context}] ${message}`, data);
   }
 
   /**
@@ -176,7 +202,7 @@ export class Logger {
    * @param data Optional data to include in log
    */
   warn(message: string, data?: any) {
-    log('warn', `[${this.context}] ${message}`, data);
+    log("warn", `[${this.context}] ${message}`, data);
   }
 
   /**
@@ -185,14 +211,14 @@ export class Logger {
    * @param data Optional data to include in log
    */
   error(message: string, data?: any) {
-    log('error', `[${this.context}] ${message}`, data);
+    log("error", `[${this.context}] ${message}`, data);
   }
 }
 
 // Handle SIGTERM for clean shutdown
-process.on('SIGTERM', () => {
-  log('info', 'Received SIGTERM signal, shutting down...');
+process.on("SIGTERM", () => {
+  log("info", "Received SIGTERM signal, shutting down...");
   logStream.end(() => {
     process.exit(0);
   });
-}); 
+});
