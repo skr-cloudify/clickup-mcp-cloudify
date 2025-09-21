@@ -3,7 +3,7 @@
 dockerfile: Dockerfile
 
 startCommand:
-  type: stdio
+  type: sse
   configSchema:
     # JSON Schema defining the configuration options for the MCP.
     type: object
@@ -18,6 +18,6 @@ startCommand:
         type: string
         description: Your ClickUp Team ID.
   commandFunction:
-    # A function that produces the CLI command to start the MCP on stdio.
+    # A function that produces the CLI command to start the MCP on SSE.
     |-
-    (config) => ({ command: 'node', args: ['build/index.js'], env: { CLICKUP_API_KEY: config.clickupApiKey, CLICKUP_TEAM_ID: config.clickupTeamId } })
+    (config) => ({ command: 'node', args: ['build/index.js'], env: { CLICKUP_API_KEY: config.clickupApiKey, CLICKUP_TEAM_ID: config.clickupTeamId, ENABLE_SSE: 'true', SSE_PORT: '3000' } })

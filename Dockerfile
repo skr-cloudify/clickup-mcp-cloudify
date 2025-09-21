@@ -31,8 +31,8 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy the entrypoint script if necessary
 COPY --from=builder /app/package.json ./
 
-# Expose the desired port (if the server binds to a port)
-EXPOSE 8080
+# Expose the desired port (SSE server runs on port 3000)
+EXPOSE 3000
 
 # Define the command to run the application
 CMD ["node", "build/index.js"]
