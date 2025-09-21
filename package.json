@@ -1,5 +1,5 @@
 {
-  "name": "@taazkareem/clickup-mcp-server",
+  "name": "@skr-cloudify/clickup-mcp-cloudify",
   "version": "0.8.5",
   "description": "ClickUp MCP Server - Integrate ClickUp tasks with AI through Model Context Protocol",
   "type": "module",
@@ -48,12 +48,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/taazkareem/clickup-mcp-server.git"
+    "url": "https://github.com/skr-cloudify/clickup-mcp-cloudify.git"
   },
   "bugs": {
-    "url": "https://github.com/taazkareem/clickup-mcp-server/issues"
+    "url": "https://github.com/skr-cloudify/clickup-mcp-cloudify/issues"
   },
-  "homepage": "https://github.com/taazkareem/clickup-mcp-server#readme",
+  "homepage": "https://github.com/skr-cloudify/clickup-mcp-cloudify#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.3",
     "axios": "^1.6.7",
