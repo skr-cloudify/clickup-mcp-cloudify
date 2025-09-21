@@ -25,6 +25,15 @@ export default function createServer({ config: smitheryConfig }) {
     process.env.CLICKUP_API_KEY = smitheryConfig.clickupApiKey;
     process.env.CLICKUP_TEAM_ID = smitheryConfig.clickupTeamId;
     process.env.ENABLE_SSE = "true"; // Enable SSE for Smithery
+  } else {
+    // For Smithery capability scanning, provide dummy values if not configured
+    if (!process.env.CLICKUP_API_KEY) {
+      process.env.CLICKUP_API_KEY = "scan_mode";
+    }
+    if (!process.env.CLICKUP_TEAM_ID) {
+      process.env.CLICKUP_TEAM_ID = "scan_mode";
+    }
+    process.env.ENABLE_SSE = "true";
   }
 
   // Validate configuration after setting environment variables
@@ -55,7 +64,10 @@ export default function createServer({ config: smitheryConfig }) {
     sslCaPath: config.sslCaPath,
   };
   
-  validateConfig(currentConfig);
+  // Only validate if we have real credentials (not scan mode)
+  if (smitheryConfig && smitheryConfig.clickupApiKey !== "scan_mode") {
+    validateConfig(currentConfig);
+  }
 
   // Configure our existing server
   configureServer();
