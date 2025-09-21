@@ -7,15 +7,20 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies without running prepare script
+RUN npm ci --ignore-scripts
 
 # Copy source files
 COPY src ./src
 COPY tsconfig.json ./
 
-# Build the project
-RUN npm run build
+# Install TypeScript globally and build
+RUN npm install -g typescript@5.3.3
+RUN tsc --version
+RUN tsc
+
+# Set permissions on the built index.js
+RUN chmod +x build/index.js
 
 # Use a smaller image for the runtime
 FROM node:18-alpine AS runtime
