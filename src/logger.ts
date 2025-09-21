@@ -13,8 +13,18 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import config, { LogLevel } from './config.js';
 
-// Get the directory name of the current module
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// Get the directory name of the current module - compatible with both ESM and CJS
+const getDirectoryName = () => {
+  try {
+    // Try ESM approach
+    return dirname(fileURLToPath(import.meta.url));
+  } catch {
+    // Fallback to CJS approach if import.meta is not available
+    return __dirname;
+  }
+};
+
+const __dirname = getDirectoryName();
 
 // Current process ID for logging
 const pid = process.pid;
