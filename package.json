@@ -3,7 +3,7 @@
   "version": "0.8.5",
   "description": "ClickUp MCP Server - Integrate ClickUp tasks with AI through Model Context Protocol",
   "type": "module",
-  "module": "src/index.ts",
+  "module": "src/smithery-entry.ts",
   "main": "build/index.js",
   "bin": {
     "clickup-mcp-server": "build/index.js"

@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: MIT
  *
  * Smithery Entry Point
- * 
+ *
  * This file creates a Smithery-compatible entry point that wraps our existing
  * MCP server implementation to work with the new Smithery deployment format.
  */
 
-import { configureServer, server } from './server.js';
-import config from './config.js';
-import { z } from 'zod';
+import { configureServer, server } from "./server.js";
+import config from "./config.js";
+import { z } from "zod";
 
 // Export configuration schema for Smithery
 export const configSchema = z.object({
@@ -24,12 +24,12 @@ export default function createServer({ config: smitheryConfig }) {
   if (smitheryConfig) {
     process.env.CLICKUP_API_KEY = smitheryConfig.clickupApiKey;
     process.env.CLICKUP_TEAM_ID = smitheryConfig.clickupTeamId;
-    process.env.ENABLE_SSE = 'true'; // Enable SSE for Smithery
+    process.env.ENABLE_SSE = "true"; // Enable SSE for Smithery
   }
 
   // Configure our existing server
   configureServer();
-  
+
   // Return the configured server instance
   return server;
 }

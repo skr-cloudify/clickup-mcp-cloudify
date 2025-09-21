@@ -3,15 +3,4 @@
 dockerfile: Dockerfile
 entrypoint: build/smithery-entry.js
 
-configSchema:
-  type: object
-  required:
-    - clickupApiKey
-    - clickupTeamId
-  properties:
-    clickupApiKey:
-      type: string
-      description: Your ClickUp API key.
-    clickupTeamId:
-      type: string
-      description: Your ClickUp Team ID.
+runtime: "typescript"
