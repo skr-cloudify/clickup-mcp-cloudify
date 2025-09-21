@@ -9,7 +9,7 @@
  */
 
 import { configureServer, server } from "./server.js";
-import config from "./config.js";
+import config, { validateConfig } from "./config.js";
 import { z } from "zod";
 
 // Export configuration schema for Smithery
@@ -26,6 +26,36 @@ export default function createServer({ config: smitheryConfig }) {
     process.env.CLICKUP_TEAM_ID = smitheryConfig.clickupTeamId;
     process.env.ENABLE_SSE = "true"; // Enable SSE for Smithery
   }
+
+  // Validate configuration after setting environment variables
+  const currentConfig = {
+    clickupApiKey: config.clickupApiKey,
+    clickupTeamId: config.clickupTeamId,
+    enableSponsorMessage: config.enableSponsorMessage,
+    documentSupport: config.documentSupport,
+    logLevel: config.logLevel,
+    disabledTools: config.disabledTools,
+    enabledTools: config.enabledTools,
+    enableSSE: config.enableSSE,
+    ssePort: config.ssePort,
+    enableStdio: config.enableStdio,
+    port: config.port,
+    enableSecurityFeatures: config.enableSecurityFeatures,
+    enableOriginValidation: config.enableOriginValidation,
+    enableRateLimit: config.enableRateLimit,
+    enableCors: config.enableCors,
+    allowedOrigins: config.allowedOrigins,
+    rateLimitMax: config.rateLimitMax,
+    rateLimitWindowMs: config.rateLimitWindowMs,
+    maxRequestSize: config.maxRequestSize,
+    enableHttps: config.enableHttps,
+    httpsPort: config.httpsPort,
+    sslKeyPath: config.sslKeyPath,
+    sslCertPath: config.sslCertPath,
+    sslCaPath: config.sslCaPath,
+  };
+  
+  validateConfig(currentConfig);
 
   // Configure our existing server
   configureServer();

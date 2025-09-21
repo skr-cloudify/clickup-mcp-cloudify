@@ -117,60 +117,96 @@ const parseOrigins = (value: string | undefined, defaultValue: string[]): string
 };
 
 // Load configuration from command line args or environment variables
-const configuration: Config = {
-  clickupApiKey: envArgs.clickupApiKey || process.env.CLICKUP_API_KEY || '',
-  clickupTeamId: envArgs.clickupTeamId || process.env.CLICKUP_TEAM_ID || '',
-  enableSponsorMessage: process.env.ENABLE_SPONSOR_MESSAGE !== 'false',
-  documentSupport: envArgs.documentSupport || process.env.DOCUMENT_SUPPORT || process.env.DOCUMENT_MODULE || process.env.DOCUMENT_MODEL || 'true',
-  logLevel: parseLogLevel(envArgs.logLevel || process.env.LOG_LEVEL),
-  disabledTools: (
-    (envArgs.disabledTools || process.env.DISABLED_TOOLS || process.env.DISABLED_COMMANDS)?.split(',').map(cmd => cmd.trim()).filter(cmd => cmd !== '') || []
-  ),
-  enabledTools: (
-    (envArgs.enabledTools || process.env.ENABLED_TOOLS)?.split(',').map(cmd => cmd.trim()).filter(cmd => cmd !== '') || []
-  ),
-  enableSSE: parseBoolean(envArgs.enableSSE || process.env.ENABLE_SSE, false),
-  ssePort: parseInteger(envArgs.ssePort || process.env.SSE_PORT, 3000),
-  enableStdio: parseBoolean(envArgs.enableStdio || process.env.ENABLE_STDIO, true),
-  port: envArgs.port || process.env.PORT || '3231',
-  // Security configuration (opt-in for backwards compatibility)
-  enableSecurityFeatures: parseBoolean(process.env.ENABLE_SECURITY_FEATURES, false),
-  enableOriginValidation: parseBoolean(process.env.ENABLE_ORIGIN_VALIDATION, false),
-  enableRateLimit: parseBoolean(process.env.ENABLE_RATE_LIMIT, false),
-  enableCors: parseBoolean(process.env.ENABLE_CORS, false),
-  allowedOrigins: parseOrigins(process.env.ALLOWED_ORIGINS, [
-    'http://127.0.0.1:3231',
-    'http://localhost:3231',
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'https://127.0.0.1:3443',
-    'https://localhost:3443',
-    'https://127.0.0.1:3231',
-    'https://localhost:3231'
-  ]),
-  rateLimitMax: parseInteger(process.env.RATE_LIMIT_MAX, 100),
-  rateLimitWindowMs: parseInteger(process.env.RATE_LIMIT_WINDOW_MS, 60000),
-  maxRequestSize: process.env.MAX_REQUEST_SIZE || '10mb',
-  // HTTPS configuration
-  enableHttps: parseBoolean(process.env.ENABLE_HTTPS, false),
-  httpsPort: process.env.HTTPS_PORT || '3443',
-  sslKeyPath: process.env.SSL_KEY_PATH,
-  sslCertPath: process.env.SSL_CERT_PATH,
-  sslCaPath: process.env.SSL_CA_PATH,
+let _configuration: Config | null = null;
+
+const getConfiguration = (): Config => {
+  if (_configuration) return _configuration;
+  
+  _configuration = {
+    clickupApiKey: envArgs.clickupApiKey || process.env.CLICKUP_API_KEY || '',
+    clickupTeamId: envArgs.clickupTeamId || process.env.CLICKUP_TEAM_ID || '',
+    enableSponsorMessage: process.env.ENABLE_SPONSOR_MESSAGE !== 'false',
+    documentSupport: envArgs.documentSupport || process.env.DOCUMENT_SUPPORT || process.env.DOCUMENT_MODULE || process.env.DOCUMENT_MODEL || 'true',
+    logLevel: parseLogLevel(envArgs.logLevel || process.env.LOG_LEVEL),
+    disabledTools: (
+      (envArgs.disabledTools || process.env.DISABLED_TOOLS || process.env.DISABLED_COMMANDS)?.split(',').map(cmd => cmd.trim()).filter(cmd => cmd !== '') || []
+    ),
+    enabledTools: (
+      (envArgs.enabledTools || process.env.ENABLED_TOOLS)?.split(',').map(cmd => cmd.trim()).filter(cmd => cmd !== '') || []
+    ),
+    enableSSE: parseBoolean(envArgs.enableSSE || process.env.ENABLE_SSE, false),
+    ssePort: parseInteger(envArgs.ssePort || process.env.SSE_PORT, 3000),
+    enableStdio: parseBoolean(envArgs.enableStdio || process.env.ENABLE_STDIO, true),
+    port: envArgs.port || process.env.PORT || '3231',
+    // Security configuration (opt-in for backwards compatibility)
+    enableSecurityFeatures: parseBoolean(process.env.ENABLE_SECURITY_FEATURES, false),
+    enableOriginValidation: parseBoolean(process.env.ENABLE_ORIGIN_VALIDATION, false),
+    enableRateLimit: parseBoolean(process.env.ENABLE_RATE_LIMIT, false),
+    enableCors: parseBoolean(process.env.ENABLE_CORS, false),
+    allowedOrigins: parseOrigins(process.env.ALLOWED_ORIGINS, [
+      'http://127.0.0.1:3231',
+      'http://localhost:3231',
+      'http://127.0.0.1:3000',
+      'http://localhost:3000',
+      'https://127.0.0.1:3443',
+      'https://localhost:3443',
+      'https://127.0.0.1:3231',
+      'https://localhost:3231'
+    ]),
+    rateLimitMax: parseInteger(process.env.RATE_LIMIT_MAX, 100),
+    rateLimitWindowMs: parseInteger(process.env.RATE_LIMIT_WINDOW_MS, 60000),
+    maxRequestSize: process.env.MAX_REQUEST_SIZE || '10mb',
+    // HTTPS configuration
+    enableHttps: parseBoolean(process.env.ENABLE_HTTPS, false),
+    httpsPort: process.env.HTTPS_PORT || '3443',
+    sslKeyPath: process.env.SSL_KEY_PATH,
+    sslCertPath: process.env.SSL_CERT_PATH,
+    sslCaPath: process.env.SSL_CA_PATH,
+  };
+
+  return _configuration;
 };
 
-// Don't log to console as it interferes with JSON-RPC communication
+// Function to validate configuration
+export const validateConfig = (config: Config): void => {
+  const requiredVars = ['clickupApiKey', 'clickupTeamId'];
+  const missingEnvVars = requiredVars
+    .filter(key => !config[key as keyof Config])
+    .map(key => key);
 
-// Validate only the required variables are present
-const requiredVars = ['clickupApiKey', 'clickupTeamId'];
-const missingEnvVars = requiredVars
-  .filter(key => !configuration[key as keyof Config])
-  .map(key => key);
+  if (missingEnvVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingEnvVars.join(', ')}`
+    );
+  }
+};
 
-if (missingEnvVars.length > 0) {
-  throw new Error(
-    `Missing required environment variables: ${missingEnvVars.join(', ')}`
-  );
-}
+// Export a getter that doesn't validate on import
+const config = {
+  get clickupApiKey() { return getConfiguration().clickupApiKey; },
+  get clickupTeamId() { return getConfiguration().clickupTeamId; },
+  get enableSponsorMessage() { return getConfiguration().enableSponsorMessage; },
+  get documentSupport() { return getConfiguration().documentSupport; },
+  get logLevel() { return getConfiguration().logLevel; },
+  get disabledTools() { return getConfiguration().disabledTools; },
+  get enabledTools() { return getConfiguration().enabledTools; },
+  get enableSSE() { return getConfiguration().enableSSE; },
+  get ssePort() { return getConfiguration().ssePort; },
+  get enableStdio() { return getConfiguration().enableStdio; },
+  get port() { return getConfiguration().port; },
+  get enableSecurityFeatures() { return getConfiguration().enableSecurityFeatures; },
+  get enableOriginValidation() { return getConfiguration().enableOriginValidation; },
+  get enableRateLimit() { return getConfiguration().enableRateLimit; },
+  get enableCors() { return getConfiguration().enableCors; },
+  get allowedOrigins() { return getConfiguration().allowedOrigins; },
+  get rateLimitMax() { return getConfiguration().rateLimitMax; },
+  get rateLimitWindowMs() { return getConfiguration().rateLimitWindowMs; },
+  get maxRequestSize() { return getConfiguration().maxRequestSize; },
+  get enableHttps() { return getConfiguration().enableHttps; },
+  get httpsPort() { return getConfiguration().httpsPort; },
+  get sslKeyPath() { return getConfiguration().sslKeyPath; },
+  get sslCertPath() { return getConfiguration().sslCertPath; },
+  get sslCaPath() { return getConfiguration().sslCaPath; },
+};
 
-export default configuration;
+export default config;
