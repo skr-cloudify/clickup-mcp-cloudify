@@ -1,20 +1,17 @@
 # Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
 
 dockerfile: Dockerfile
+entrypoint: build/smithery-entry.js
 
-startCommand:
-  type: stdio
-  configSchema:
-    type: object
-    required:
-      - clickupApiKey
-      - clickupTeamId
-    properties:
-      clickupApiKey:
-        type: string
-        description: Your ClickUp API key.
-      clickupTeamId:
-        type: string
-        description: Your ClickUp Team ID.
-  commandFunction: |-
-    (config) => ({ command: 'node', args: ['build/index.js'], env: { CLICKUP_API_KEY: config.clickupApiKey, CLICKUP_TEAM_ID: config.clickupTeamId } })
+configSchema:
+  type: object
+  required:
+    - clickupApiKey
+    - clickupTeamId
+  properties:
+    clickupApiKey:
+      type: string
+      description: Your ClickUp API key.
+    clickupTeamId:
+      type: string
+      description: Your ClickUp Team ID.
