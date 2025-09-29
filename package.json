@@ -22,7 +22,8 @@
     "prepare": "npm run build",
     "postinstall": "npm run build",
     "heroku-postbuild": "npm run build",
-    "prebuild": "rm -f Dockerfile Dockerfile.* || true"
+    "prebuild": "./remove-docker.sh",
+    "preinstall": "./remove-docker.sh"
   },
   "keywords": [
     "clickup",

@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  
+[build.environment]
+  NODE_VERSION = "18.20.4"
+  NPM_VERSION = "10.9.3"
+  
+# Explicitly disable Docker
+[docker]
+  enabled = false
+
+# Force Node.js buildpack
+[[build.env]]
+  BUILDPACK_URL = "https://github.com/heroku/heroku-buildpack-nodejs"

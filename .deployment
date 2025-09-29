@@ -1,0 +1,20 @@
+# DEPLOYMENT PLATFORM: USE NODE.JS ONLY
+# This file instructs any deployment platform to use Node.js runtime
+# DO NOT USE DOCKER OR CONTAINERS
+
+[nodejs]
+version = "18.20.4"
+runtime = "nodejs"
+buildpack = "nodejs"
+
+[build]
+command = "npm install && npm run build"
+outputDirectory = "build"
+
+[start]
+command = "npm start"
+
+[environment]
+NODE_ENV = "production"
+USE_DOCKER = "false"
+NO_CONTAINER = "true"
