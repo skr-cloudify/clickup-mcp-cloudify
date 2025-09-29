@@ -68,21 +68,31 @@ export class TaskServiceComments {
    */
   async createTaskComment(
     taskId: string,
-    commentText: string,
+    commentText?: string,
     notifyAll: boolean = false,
-    assignee?: number | null
+    assignee?: number | null,
+    richComment?: any[]
   ): Promise<ClickUpComment> {
-    (this.core as any).logOperation('createTaskComment', { taskId, commentText, notifyAll, assignee });
+    (this.core as any).logOperation('createTaskComment', { taskId, commentText, richComment, notifyAll, assignee });
 
     try {
       const payload: {
-        comment_text: string;
+        comment_text?: string;
+        comment?: any[];
         notify_all: boolean;
         assignee?: number;
       } = {
-        comment_text: commentText,
         notify_all: notifyAll
       };
+
+      // Use rich comment format if provided, otherwise fall back to plain text
+      if (richComment && richComment.length > 0) {
+        payload.comment = richComment;
+      } else if (commentText) {
+        payload.comment_text = commentText;
+      } else {
+        throw new Error('Either commentText or richComment must be provided');
+      }
 
       if (assignee) {
         payload.assignee = assignee;

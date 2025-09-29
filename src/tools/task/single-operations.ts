@@ -443,7 +443,7 @@ export const getTaskCommentsTool = {
  */
 export const createTaskCommentTool = {
   name: "create_task_comment",
-  description: `Creates task comment. Use taskId (preferred) or taskName + listName. Required: commentText. Optional: notifyAll to notify assignees, assignee to assign comment.`,
+  description: `Creates task comment with rich text formatting support. Use taskId (preferred) or taskName + listName. Supports both plain text (commentText) and rich text (richComment) formatting including bold, italic, code, lists, emoji, links, and @mentions.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -461,7 +461,66 @@ export const createTaskCommentTool = {
       },
       commentText: {
         type: "string",
-        description: "REQUIRED: Text content of the comment to create."
+        description: "Plain text content of the comment. Use this for simple text comments. Cannot be used together with richComment."
+      },
+      richComment: {
+        type: "array",
+        description: "Rich text comment with formatting. Use this for formatted comments with bold, italic, code, lists, emoji, links, or @mentions. Cannot be used together with commentText.",
+        items: {
+          type: "object",
+          properties: {
+            text: {
+              type: "string",
+              description: "Text content of this segment"
+            },
+            type: {
+              type: "string",
+              enum: ["text", "tag", "emoticon"],
+              description: "Type of content: 'text' for regular text, 'tag' for @mentions, 'emoticon' for emoji"
+            },
+            attributes: {
+              type: "object",
+              description: "Formatting attributes for text",
+              properties: {
+                bold: { type: "boolean", description: "Make text bold" },
+                italic: { type: "boolean", description: "Make text italic" },
+                code: { type: "boolean", description: "Format as inline code" },
+                link: { type: "string", description: "URL for hyperlink" },
+                "code-block": {
+                  type: "object",
+                  properties: {
+                    "code-block": { type: "string", description: "Language for code block (e.g., 'javascript', 'python', 'plain')" }
+                  }
+                },
+                list: {
+                  type: "object",
+                  properties: {
+                    list: { 
+                      type: "string", 
+                      enum: ["bullet", "ordered", "checked", "unchecked"],
+                      description: "List type: 'bullet' for bulleted, 'ordered' for numbered, 'checked'/'unchecked' for checklist" 
+                    }
+                  }
+                }
+              }
+            },
+            user: {
+              type: "object",
+              description: "User to mention (for type: 'tag')",
+              properties: {
+                id: { type: "number", description: "ClickUp user ID to mention" }
+              }
+            },
+            emoticon: {
+              type: "object",
+              description: "Emoji configuration (for type: 'emoticon')",
+              properties: {
+                code: { type: "string", description: "Unicode emoji code (hex, without U+). Example: '1f60a' for 😊" }
+              }
+            }
+          },
+          required: ["text"]
+        }
       },
       notifyAll: {
         type: "boolean",
@@ -472,7 +531,10 @@ export const createTaskCommentTool = {
         description: "Optional user ID to assign the comment to."
       }
     },
-    required: ["commentText"]
+    oneOf: [
+      { required: ["commentText"] },
+      { required: ["richComment"] }
+    ]
   }
 };
 

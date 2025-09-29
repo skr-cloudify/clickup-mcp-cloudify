@@ -15,7 +15,10 @@ import { z } from "zod";
 // Export configuration schema for Smithery
 export const configSchema = z.object({
   clickupApiKey: z.string().describe("Your ClickUp API key"),
-  clickupTeamId: z.union([z.string(), z.number()]).transform(val => String(val)).describe("Your ClickUp Team ID"),
+  clickupTeamId: z
+    .union([z.string(), z.number()])
+    .transform((val) => String(val))
+    .describe("Your ClickUp Team ID"),
 });
 
 // Export default function that Smithery expects

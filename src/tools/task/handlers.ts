@@ -702,9 +702,14 @@ export async function getTaskCommentsHandler(params) {
  * Handler for creating a task comment
  */
 export async function createTaskCommentHandler(params) {
-  // Validate required parameters
-  if (!params.commentText) {
-    throw new Error('Comment text is required');
+  // Validate that either commentText or richComment is provided
+  if (!params.commentText && !params.richComment) {
+    throw new Error('Either commentText or richComment is required');
+  }
+
+  // Validate that both are not provided
+  if (params.commentText && params.richComment) {
+    throw new Error('Cannot provide both commentText and richComment. Use one or the other.');
   }
 
   try {
@@ -714,12 +719,13 @@ export async function createTaskCommentHandler(params) {
     // Extract other parameters with defaults
     const {
       commentText,
+      richComment,
       notifyAll = false,
       assignee = null
     } = params;
 
     // Create the comment
-    return await taskService.createTaskComment(taskId, commentText, notifyAll, assignee);
+    return await taskService.createTaskComment(taskId, commentText, notifyAll, assignee, richComment);
   } catch (error) {
     // If this is a task lookup error, provide more helpful message
     if (error.message?.includes('not found') || error.message?.includes('identify task')) {

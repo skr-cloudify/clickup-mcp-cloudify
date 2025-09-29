@@ -120,8 +120,8 @@ export class TaskService extends TaskServiceCore {
     return this.comments.getTaskComments(taskId, start, startId);
   }
 
-  async createTaskComment(taskId: string, commentText: string, notifyAll?: boolean, assignee?: number): Promise<ClickUpComment> {
-    return this.comments.createTaskComment(taskId, commentText, notifyAll, assignee);
+  async createTaskComment(taskId: string, commentText?: string, notifyAll?: boolean, assignee?: number, richComment?: any[]): Promise<ClickUpComment> {
+    return this.comments.createTaskComment(taskId, commentText, notifyAll, assignee, richComment);
   }
 
   // ===== DELEGATED TAG METHODS =====
