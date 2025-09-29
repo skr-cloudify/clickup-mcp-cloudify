@@ -1,7 +1,7 @@
 #!/bin/bash
-# This script completely prevents Docker usage
-echo "Removing any Docker files..."
-find . -name "Dockerfile*" -delete 2>/dev/null || true
+# This script prevents Docker usage except for our error Dockerfile
+echo "Checking for Docker files..."
+find . -name "Dockerfile.*" -delete 2>/dev/null || true
 find . -name "*.dockerfile" -delete 2>/dev/null || true
 find . -name "docker-compose*" -delete 2>/dev/null || true
-echo "Docker files removed. Using Node.js runtime."
+echo "Unwanted Docker files removed. Dockerfile remains to show error message."
