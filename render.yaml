@@ -1,0 +1,5 @@
+# Render.com build configuration
+# This forces Render to use Node.js runtime instead of Docker
+
+build: npm run build
+start: npm start
