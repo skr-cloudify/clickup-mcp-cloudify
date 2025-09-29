@@ -1,0 +1,7 @@
+# This file forces the deployment platform to use Node.js runtime
+# DO NOT USE DOCKER - Use Node.js with npm scripts instead
+
+runtime: nodejs
+buildpack: nodejs
+platform: node
+engine: node

@@ -1,0 +1,4 @@
+# This file exists to prevent Docker builds
+# Platform should use Node.js instead
+USE_NODE_JS=true
+NO_DOCKER=true
