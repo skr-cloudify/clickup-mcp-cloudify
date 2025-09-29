@@ -1,6 +1,6 @@
 {
   "name": "@skr-cloudify/clickup-mcp-cloudify",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "ClickUp MCP Server - Integrate ClickUp tasks with AI through Model Context Protocol",
   "type": "module",
   "module": "src/smithery-entry.ts",
