@@ -10,13 +10,13 @@
  * Extends TaskServiceCore and composes other services as properties.
  */
 
-import { TaskServiceCore } from './task-core.js';
-import { TaskServiceSearch } from './task-search.js';
-import { TaskServiceAttachments } from './task-attachments.js';
-import { TaskServiceComments } from './task-comments.js';
-import { TaskServiceTags } from './task-tags.js';
-import { TaskServiceCustomFields } from './task-custom-fields.js';
-import { WorkspaceService } from '../workspace.js';
+import { TaskServiceCore } from "./task-core.js";
+import { TaskServiceSearch } from "./task-search.js";
+import { TaskServiceAttachments } from "./task-attachments.js";
+import { TaskServiceComments } from "./task-comments.js";
+import { TaskServiceTags } from "./task-tags.js";
+import { TaskServiceCustomFields } from "./task-custom-fields.js";
+import { WorkspaceService } from "../workspace.js";
 import {
   ClickUpTask,
   UpdateTaskData,
@@ -25,9 +25,9 @@ import {
   ClickUpTaskAttachment,
   ExtendedTaskFilters,
   DetailedTaskResponse,
-  WorkspaceTasksResponse
-} from '../types.js';
-import { CustomFieldValue } from './task-custom-fields.js';
+  WorkspaceTasksResponse,
+} from "../types.js";
+import { CustomFieldValue } from "./task-custom-fields.js";
 
 /**
  * Complete TaskService combining all task-related functionality
@@ -43,9 +43,14 @@ export class TaskService extends TaskServiceCore {
   public readonly tags: TaskServiceTags;
   public readonly customFields: TaskServiceCustomFields;
 
-  constructor(apiKey: string, teamId: string, baseUrl?: string, workspaceService?: WorkspaceService) {
+  constructor(
+    apiKey: string,
+    teamId: string,
+    baseUrl?: string,
+    workspaceService?: WorkspaceService
+  ) {
     super(apiKey, teamId, baseUrl, workspaceService);
-    this.logOperation('constructor', { initialized: true });
+    this.logOperation("constructor", { initialized: true });
 
     // Initialize composed services with core as dependency
     this.search = new TaskServiceSearch(this);
@@ -57,15 +62,22 @@ export class TaskService extends TaskServiceCore {
 
   // ===== DELEGATED SEARCH METHODS =====
 
-  async findTaskByName(listId: string, taskName: string): Promise<ClickUpTask | null> {
+  async findTaskByName(
+    listId: string,
+    taskName: string
+  ): Promise<ClickUpTask | null> {
     return this.search.findTaskByName(listId, taskName);
   }
 
-  async getWorkspaceTasks(filters: ExtendedTaskFilters = {}): Promise<DetailedTaskResponse | WorkspaceTasksResponse> {
+  async getWorkspaceTasks(
+    filters: ExtendedTaskFilters = {}
+  ): Promise<DetailedTaskResponse | WorkspaceTasksResponse> {
     return this.search.getWorkspaceTasks(filters);
   }
 
-  async getTaskSummaries(filters: ExtendedTaskFilters = {}): Promise<WorkspaceTasksResponse> {
+  async getTaskSummaries(
+    filters: ExtendedTaskFilters = {}
+  ): Promise<WorkspaceTasksResponse> {
     return this.search.getTaskSummaries(filters);
   }
 
@@ -73,15 +85,24 @@ export class TaskService extends TaskServiceCore {
     return this.search.getListViews(listId);
   }
 
-  async getTasksFromView(viewId: string, filters: ExtendedTaskFilters = {}): Promise<ClickUpTask[]> {
+  async getTasksFromView(
+    viewId: string,
+    filters: ExtendedTaskFilters = {}
+  ): Promise<ClickUpTask[]> {
     return this.search.getTasksFromView(viewId, filters);
   }
 
-  async getTaskDetails(filters: ExtendedTaskFilters = {}): Promise<DetailedTaskResponse> {
+  async getTaskDetails(
+    filters: ExtendedTaskFilters = {}
+  ): Promise<DetailedTaskResponse> {
     return this.search.getTaskDetails(filters);
   }
 
-  async updateTaskByName(listId: string, taskName: string, updateData: UpdateTaskData): Promise<ClickUpTask> {
+  async updateTaskByName(
+    listId: string,
+    taskName: string,
+    updateData: UpdateTaskData
+  ): Promise<ClickUpTask> {
     return this.search.updateTaskByName(listId, taskName, updateData);
   }
 
@@ -106,22 +127,52 @@ export class TaskService extends TaskServiceCore {
 
   // ===== DELEGATED ATTACHMENT METHODS =====
 
-  async uploadTaskAttachment(taskId: string, fileData: Buffer, fileName: string): Promise<ClickUpTaskAttachment> {
+  async uploadTaskAttachment(
+    taskId: string,
+    fileData: Buffer,
+    fileName: string
+  ): Promise<ClickUpTaskAttachment> {
     return this.attachments.uploadTaskAttachment(taskId, fileData, fileName);
   }
 
-  async uploadTaskAttachmentFromUrl(taskId: string, fileUrl: string, fileName?: string, authHeader?: string): Promise<ClickUpTaskAttachment> {
-    return this.attachments.uploadTaskAttachmentFromUrl(taskId, fileUrl, fileName, authHeader);
+  async uploadTaskAttachmentFromUrl(
+    taskId: string,
+    fileUrl: string,
+    fileName?: string,
+    authHeader?: string
+  ): Promise<ClickUpTaskAttachment> {
+    return this.attachments.uploadTaskAttachmentFromUrl(
+      taskId,
+      fileUrl,
+      fileName,
+      authHeader
+    );
   }
 
   // ===== DELEGATED COMMENT METHODS =====
 
-  async getTaskComments(taskId: string, start?: number, startId?: string): Promise<ClickUpComment[]> {
+  async getTaskComments(
+    taskId: string,
+    start?: number,
+    startId?: string
+  ): Promise<ClickUpComment[]> {
     return this.comments.getTaskComments(taskId, start, startId);
   }
 
-  async createTaskComment(taskId: string, commentText?: string, notifyAll?: boolean, assignee?: number, richComment?: any[]): Promise<ClickUpComment> {
-    return this.comments.createTaskComment(taskId, commentText, notifyAll, assignee, richComment);
+  async createTaskComment(
+    taskId: string,
+    commentText?: string,
+    notifyAll?: boolean,
+    assignee?: number,
+    richComment?: any[]
+  ): Promise<ClickUpComment> {
+    return this.comments.createTaskComment(
+      taskId,
+      commentText,
+      notifyAll,
+      assignee,
+      richComment
+    );
   }
 
   // ===== DELEGATED TAG METHODS =====
@@ -144,11 +195,18 @@ export class TaskService extends TaskServiceCore {
 
   // ===== DELEGATED CUSTOM FIELD METHODS =====
 
-  async setCustomFieldValue(taskId: string, fieldId: string, value: any): Promise<boolean> {
+  async setCustomFieldValue(
+    taskId: string,
+    fieldId: string,
+    value: any
+  ): Promise<boolean> {
     return this.customFields.setCustomFieldValue(taskId, fieldId, value);
   }
 
-  async setCustomFieldValues(taskId: string, customFields: CustomFieldValue[]): Promise<boolean> {
+  async setCustomFieldValues(
+    taskId: string,
+    customFields: CustomFieldValue[]
+  ): Promise<boolean> {
     return this.customFields.setCustomFieldValues(taskId, customFields);
   }
 

@@ -12,7 +12,6 @@
     "build",
     "README.md",
     "LICENSE",
-    "Dockerfile",
     "smithery.yaml",
     "package-lock.json"
   ],

@@ -3,28 +3,28 @@
  * SPDX-License-Identifier: MIT
  *
  * ClickUp MCP Single Task Operations
- * 
+ *
  * This module defines tools for single task operations including creating,
  * updating, moving, duplicating, and deleting tasks, as well as retrieving
  * task details and comments.
  */
 
-import { 
+import {
   ClickUpComment,
-  ClickUpTask, 
+  ClickUpTask,
   CreateTaskData,
-  TaskPriority, 
-  UpdateTaskData
-} from '../../services/clickup/types.js';
-import { parseDueDate } from '../utils.js';
-import { clickUpServices } from '../../services/shared.js';
-import { 
+  TaskPriority,
+  UpdateTaskData,
+} from "../../services/clickup/types.js";
+import { parseDueDate } from "../utils.js";
+import { clickUpServices } from "../../services/shared.js";
+import {
   formatTaskData,
   resolveListIdWithValidation,
   validateTaskUpdateData,
   validateTaskIdentification,
-  validateListIdentification
-} from './utilities.js';
+  validateListIdentification,
+} from "./utilities.js";
 
 // Use shared services instance
 const { task: taskService } = clickUpServices;
@@ -35,7 +35,7 @@ const { task: taskService } = clickUpServices;
 
 // Common validation functions
 const validateTaskName = (name: string) => {
-  if (!name || typeof name !== 'string') {
+  if (!name || typeof name !== "string") {
     throw new Error("A task name is required");
   }
 
@@ -47,14 +47,19 @@ const validateTaskName = (name: string) => {
 };
 
 const validatePriority = (priority?: number) => {
-  if (priority !== undefined && (typeof priority !== 'number' || priority < 1 || priority > 4)) {
+  if (
+    priority !== undefined &&
+    (typeof priority !== "number" || priority < 1 || priority > 4)
+  ) {
     throw new Error("Priority must be a number between 1 and 4");
   }
 };
 
 const validateDueDate = (dueDate?: string) => {
-  if (dueDate && typeof dueDate !== 'string') {
-    throw new Error("Due date must be a string in timestamp format or natural language");
+  if (dueDate && typeof dueDate !== "string") {
+    throw new Error(
+      "Due date must be a string in timestamp format or natural language"
+    );
   }
 };
 
@@ -79,50 +84,60 @@ export const createTaskTool = {
     properties: {
       name: {
         type: "string",
-        description: "REQUIRED: Name of the task. Put a relevant emoji followed by a blank space before the name."
+        description:
+          "REQUIRED: Name of the task. Put a relevant emoji followed by a blank space before the name.",
       },
       listId: {
         type: "string",
-        description: "REQUIRED (unless listName provided): ID of the list to create the task in. If you have this ID from a previous response, use it directly rather than looking up by name."
+        description:
+          "REQUIRED (unless listName provided): ID of the list to create the task in. If you have this ID from a previous response, use it directly rather than looking up by name.",
       },
       listName: {
         type: "string",
-        description: "REQUIRED (unless listId provided): Name of the list to create the task in - will automatically find the list by name."
+        description:
+          "REQUIRED (unless listId provided): Name of the list to create the task in - will automatically find the list by name.",
       },
       description: {
         type: "string",
-        description: "Optional plain text description for the task"
+        description: "Optional plain text description for the task",
       },
       markdown_description: {
         type: "string",
-        description: "Optional markdown formatted description for the task. If provided, this takes precedence over description"
+        description:
+          "Optional markdown formatted description for the task. If provided, this takes precedence over description",
       },
       status: {
         type: "string",
-        description: "Optional: Override the default ClickUp status. In most cases, you should omit this to use ClickUp defaults"
+        description:
+          "Optional: Override the default ClickUp status. In most cases, you should omit this to use ClickUp defaults",
       },
       priority: {
         type: "number",
-        description: "Optional priority of the task (1-4), where 1 is urgent/highest priority and 4 is lowest priority. Only set this when explicitly requested."
+        description:
+          "Optional priority of the task (1-4), where 1 is urgent/highest priority and 4 is lowest priority. Only set this when explicitly requested.",
       },
       dueDate: {
         type: "string",
-        description: "Optional due date. Supports Unix timestamps (ms) or natural language like '1 hour from now', 'tomorrow', 'next week', etc."
+        description:
+          "Optional due date. Supports Unix timestamps (ms) or natural language like '1 hour from now', 'tomorrow', 'next week', etc.",
       },
       startDate: {
         type: "string",
-        description: "Optional start date. Supports Unix timestamps (ms) or natural language like 'now', 'start of today', etc."
+        description:
+          "Optional start date. Supports Unix timestamps (ms) or natural language like 'now', 'start of today', etc.",
       },
       parent: {
         type: "string",
-        description: "Optional ID of the parent task. When specified, this task will be created as a subtask of the specified parent task."
+        description:
+          "Optional ID of the parent task. When specified, this task will be created as a subtask of the specified parent task.",
       },
       tags: {
         type: "array",
         items: {
-          type: "string"
+          type: "string",
         },
-        description: "Optional array of tag names to assign to the task. The tags must already exist in the space."
+        description:
+          "Optional array of tag names to assign to the task. The tags must already exist in the space.",
       },
       custom_fields: {
         type: "array",
@@ -131,32 +146,33 @@ export const createTaskTool = {
           properties: {
             id: {
               type: "string",
-              description: "ID of the custom field"
+              description: "ID of the custom field",
             },
             value: {
-              description: "Value for the custom field. Type depends on the field type."
-            }
+              description:
+                "Value for the custom field. Type depends on the field type.",
+            },
           },
-          required: ["id", "value"]
+          required: ["id", "value"],
         },
-        description: "Optional array of custom field values to set on the task. Each object must have an 'id' and 'value' property."
+        description:
+          "Optional array of custom field values to set on the task. Each object must have an 'id' and 'value' property.",
       },
       check_required_custom_fields: {
         type: "boolean",
-        description: "Optional flag to check if all required custom fields are set before saving the task."
+        description:
+          "Optional flag to check if all required custom fields are set before saving the task.",
       },
       assignees: {
         type: "array",
         items: {
-          oneOf: [
-            { type: "number" },
-            { type: "string" }
-          ]
+          oneOf: [{ type: "number" }, { type: "string" }],
         },
-        description: "Optional array of assignee user IDs (numbers), emails, or usernames to assign to the task."
-      }
-    }
-  }
+        description:
+          "Optional array of assignee user IDs (numbers), emails, or usernames to assign to the task.",
+      },
+    },
+  },
 };
 
 /**
@@ -170,49 +186,59 @@ export const updateTaskTool = {
     properties: {
       taskId: {
         type: "string",
-        description: "ID of task to update (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456')."
+        description:
+          "ID of task to update (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456').",
       },
       taskName: {
         type: "string",
-        description: "Name of task to update. The tool will search for tasks with this name across all lists unless listName is specified."
+        description:
+          "Name of task to update. The tool will search for tasks with this name across all lists unless listName is specified.",
       },
       listName: {
         type: "string",
-        description: "Optional: Name of list containing the task. Providing this narrows the search to a specific list, improving performance and reducing ambiguity."
+        description:
+          "Optional: Name of list containing the task. Providing this narrows the search to a specific list, improving performance and reducing ambiguity.",
       },
       name: {
         type: "string",
-        description: "New name for the task. Include emoji prefix if appropriate."
+        description:
+          "New name for the task. Include emoji prefix if appropriate.",
       },
       description: {
         type: "string",
-        description: "New plain text description. Will be ignored if markdown_description is provided."
+        description:
+          "New plain text description. Will be ignored if markdown_description is provided.",
       },
       markdown_description: {
         type: "string",
-        description: "New markdown description. Takes precedence over plain text description."
+        description:
+          "New markdown description. Takes precedence over plain text description.",
       },
       status: {
         type: "string",
-        description: "New status. Must be valid for the task's current list."
+        description: "New status. Must be valid for the task's current list.",
       },
       priority: {
         type: "string",
         nullable: true,
         enum: ["1", "2", "3", "4", null],
-        description: "New priority: 1 (urgent) to 4 (low). Set null to clear priority."
+        description:
+          "New priority: 1 (urgent) to 4 (low). Set null to clear priority.",
       },
       dueDate: {
         type: "string",
-        description: "New due date. Supports both Unix timestamps (in milliseconds) and natural language expressions like '1 hour from now', 'tomorrow', 'next week', or '3 days from now'."
+        description:
+          "New due date. Supports both Unix timestamps (in milliseconds) and natural language expressions like '1 hour from now', 'tomorrow', 'next week', or '3 days from now'.",
       },
       startDate: {
         type: "string",
-        description: "New start date. Supports both Unix timestamps (in milliseconds) and natural language expressions."
+        description:
+          "New start date. Supports both Unix timestamps (in milliseconds) and natural language expressions.",
       },
       time_estimate: {
         type: "string",
-        description: "Time estimate for the task. For best compatibility with the ClickUp API, use a numeric value in minutes (e.g., '150' for 2h 30m)"
+        description:
+          "Time estimate for the task. For best compatibility with the ClickUp API, use a numeric value in minutes (e.g., '150' for 2h 30m)",
       },
       custom_fields: {
         type: "array",
@@ -221,28 +247,28 @@ export const updateTaskTool = {
           properties: {
             id: {
               type: "string",
-              description: "ID of the custom field"
+              description: "ID of the custom field",
             },
             value: {
-              description: "Value for the custom field. Type depends on the field type."
-            }
+              description:
+                "Value for the custom field. Type depends on the field type.",
+            },
           },
-          required: ["id", "value"]
+          required: ["id", "value"],
         },
-        description: "Optional array of custom field values to set on the task. Each object must have an 'id' and 'value' property."
+        description:
+          "Optional array of custom field values to set on the task. Each object must have an 'id' and 'value' property.",
       },
       assignees: {
         type: "array",
         items: {
-          oneOf: [
-            { type: "number" },
-            { type: "string" }
-          ]
+          oneOf: [{ type: "number" }, { type: "string" }],
         },
-        description: "Optional array of assignee user IDs (numbers), emails, or usernames to assign to the task."
-      }
-    }
-  }
+        description:
+          "Optional array of assignee user IDs (numbers), emails, or usernames to assign to the task.",
+      },
+    },
+  },
 };
 
 /**
@@ -256,27 +282,32 @@ export const moveTaskTool = {
     properties: {
       taskId: {
         type: "string",
-        description: "ID of the task to move (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456')."
+        description:
+          "ID of the task to move (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456').",
       },
       taskName: {
         type: "string",
-        description: "Name of the task to move. When using this, you MUST also provide sourceListName."
+        description:
+          "Name of the task to move. When using this, you MUST also provide sourceListName.",
       },
       sourceListName: {
         type: "string",
-        description: "REQUIRED with taskName: Current list containing the task."
+        description:
+          "REQUIRED with taskName: Current list containing the task.",
       },
       listId: {
         type: "string",
-        description: "ID of destination list (preferred). Use this instead of listName if you have it."
+        description:
+          "ID of destination list (preferred). Use this instead of listName if you have it.",
       },
       listName: {
         type: "string",
-        description: "Name of destination list. Only use if you don't have listId."
-      }
+        description:
+          "Name of destination list. Only use if you don't have listId.",
+      },
     },
-    required: []
-  }
+    required: [],
+  },
 };
 
 /**
@@ -290,27 +321,32 @@ export const duplicateTaskTool = {
     properties: {
       taskId: {
         type: "string",
-        description: "ID of task to duplicate (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456')."
+        description:
+          "ID of task to duplicate (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456').",
       },
       taskName: {
         type: "string",
-        description: "Name of task to duplicate. When using this, you MUST provide sourceListName."
+        description:
+          "Name of task to duplicate. When using this, you MUST provide sourceListName.",
       },
       sourceListName: {
         type: "string",
-        description: "REQUIRED with taskName: List containing the original task."
+        description:
+          "REQUIRED with taskName: List containing the original task.",
       },
       listId: {
         type: "string",
-        description: "ID of list for the duplicate (optional). Defaults to same list as original."
+        description:
+          "ID of list for the duplicate (optional). Defaults to same list as original.",
       },
       listName: {
         type: "string",
-        description: "Name of list for the duplicate. Only use if you don't have listId."
-      }
+        description:
+          "Name of list for the duplicate. Only use if you don't have listId.",
+      },
     },
-    required: []
-  }
+    required: [],
+  },
 };
 
 /**
@@ -324,26 +360,31 @@ export const getTaskTool = {
     properties: {
       taskId: {
         type: "string",
-        description: "ID of task to retrieve (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456'). Simply provide any task ID format here."
+        description:
+          "ID of task to retrieve (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456'). Simply provide any task ID format here.",
       },
       taskName: {
         type: "string",
-        description: "Name of task to retrieve. Can be used alone for a global search, or with listName for faster lookup."
+        description:
+          "Name of task to retrieve. Can be used alone for a global search, or with listName for faster lookup.",
       },
       listName: {
         type: "string",
-        description: "Name of list containing the task. Optional but recommended when using taskName."
+        description:
+          "Name of list containing the task. Optional but recommended when using taskName.",
       },
       customTaskId: {
         type: "string",
-        description: "Custom task ID (e.g., 'DEV-1234'). This parameter is now optional since taskId automatically handles custom IDs. Use only for explicit custom ID lookup or backward compatibility."
+        description:
+          "Custom task ID (e.g., 'DEV-1234'). This parameter is now optional since taskId automatically handles custom IDs. Use only for explicit custom ID lookup or backward compatibility.",
       },
       subtasks: {
         type: "boolean",
-        description: "Whether to include subtasks in the response. Set to true to retrieve full details of all subtasks."
-      }
-    }
-  }
+        description:
+          "Whether to include subtasks in the response. Set to true to retrieve full details of all subtasks.",
+      },
+    },
+  },
 };
 
 /**
@@ -369,40 +410,42 @@ Notes:
     properties: {
       listId: {
         type: "string",
-        description: "ID of list to get tasks from (preferred). Use this instead of listName if you have it."
+        description:
+          "ID of list to get tasks from (preferred). Use this instead of listName if you have it.",
       },
       listName: {
         type: "string",
-        description: "Name of list to get tasks from. Only use if you don't have listId."
+        description:
+          "Name of list to get tasks from. Only use if you don't have listId.",
       },
       subtasks: {
         type: "boolean",
-        description: "Include subtasks"
+        description: "Include subtasks",
       },
       statuses: {
         type: "array",
         items: { type: "string" },
-        description: "Filter by status names (e.g. ['To Do', 'In Progress'])"
+        description: "Filter by status names (e.g. ['To Do', 'In Progress'])",
       },
       archived: {
         type: "boolean",
-        description: "Include archived tasks"
+        description: "Include archived tasks",
       },
       page: {
         type: "number",
-        description: "Page number for pagination (starts at 0)"
+        description: "Page number for pagination (starts at 0)",
       },
       order_by: {
         type: "string",
-        description: "Sort field: due_date, created, updated"
+        description: "Sort field: due_date, created, updated",
       },
       reverse: {
         type: "boolean",
-        description: "Reverse sort order (descending)"
-      }
+        description: "Reverse sort order (descending)",
+      },
     },
-    required: []
-  }
+    required: [],
+  },
 };
 
 /**
@@ -416,26 +459,31 @@ export const getTaskCommentsTool = {
     properties: {
       taskId: {
         type: "string",
-        description: "ID of task to retrieve comments for (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456')."
+        description:
+          "ID of task to retrieve comments for (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456').",
       },
       taskName: {
         type: "string",
-        description: "Name of task to retrieve comments for. Warning: Task names may not be unique."
+        description:
+          "Name of task to retrieve comments for. Warning: Task names may not be unique.",
       },
       listName: {
         type: "string",
-        description: "Name of list containing the task. Helps find the right task when using taskName."
+        description:
+          "Name of list containing the task. Helps find the right task when using taskName.",
       },
       start: {
         type: "number",
-        description: "Timestamp (in milliseconds) to start retrieving comments from. Used for pagination."
+        description:
+          "Timestamp (in milliseconds) to start retrieving comments from. Used for pagination.",
       },
       startId: {
         type: "string",
-        description: "Comment ID to start from. Used together with start for pagination."
-      }
-    }
-  }
+        description:
+          "Comment ID to start from. Used together with start for pagination.",
+      },
+    },
+  },
 };
 
 /**
@@ -449,34 +497,40 @@ export const createTaskCommentTool = {
     properties: {
       taskId: {
         type: "string",
-        description: "ID of task to comment on (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456')."
+        description:
+          "ID of task to comment on (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456').",
       },
       taskName: {
         type: "string",
-        description: "Name of task to comment on. When using this parameter, you MUST also provide listName."
+        description:
+          "Name of task to comment on. When using this parameter, you MUST also provide listName.",
       },
       listName: {
         type: "string",
-        description: "Name of list containing the task. REQUIRED when using taskName."
+        description:
+          "Name of list containing the task. REQUIRED when using taskName.",
       },
       commentText: {
         type: "string",
-        description: "Plain text content of the comment. Use this for simple text comments. Cannot be used together with richComment."
+        description:
+          "Plain text content of the comment. Use this for simple text comments. Cannot be used together with richComment.",
       },
       richComment: {
         type: "array",
-        description: "Rich text comment with formatting. Use this for formatted comments with bold, italic, code, lists, emoji, links, or @mentions. Cannot be used together with commentText.",
+        description:
+          "Rich text comment with formatting. Use this for formatted comments with bold, italic, code, lists, emoji, links, or @mentions. Cannot be used together with commentText.",
         items: {
           type: "object",
           properties: {
             text: {
               type: "string",
-              description: "Text content of this segment"
+              description: "Text content of this segment",
             },
             type: {
               type: "string",
               enum: ["text", "tag", "emoticon"],
-              description: "Type of content: 'text' for regular text, 'tag' for @mentions, 'emoticon' for emoji"
+              description:
+                "Type of content: 'text' for regular text, 'tag' for @mentions, 'emoticon' for emoji",
             },
             attributes: {
               type: "object",
@@ -489,53 +543,62 @@ export const createTaskCommentTool = {
                 "code-block": {
                   type: "object",
                   properties: {
-                    "code-block": { type: "string", description: "Language for code block (e.g., 'javascript', 'python', 'plain')" }
-                  }
+                    "code-block": {
+                      type: "string",
+                      description:
+                        "Language for code block (e.g., 'javascript', 'python', 'plain')",
+                    },
+                  },
                 },
                 list: {
                   type: "object",
                   properties: {
-                    list: { 
-                      type: "string", 
+                    list: {
+                      type: "string",
                       enum: ["bullet", "ordered", "checked", "unchecked"],
-                      description: "List type: 'bullet' for bulleted, 'ordered' for numbered, 'checked'/'unchecked' for checklist" 
-                    }
-                  }
-                }
-              }
+                      description:
+                        "List type: 'bullet' for bulleted, 'ordered' for numbered, 'checked'/'unchecked' for checklist",
+                    },
+                  },
+                },
+              },
             },
             user: {
               type: "object",
               description: "User to mention (for type: 'tag')",
               properties: {
-                id: { type: "number", description: "ClickUp user ID to mention" }
-              }
+                id: {
+                  type: "number",
+                  description: "ClickUp user ID to mention",
+                },
+              },
             },
             emoticon: {
               type: "object",
               description: "Emoji configuration (for type: 'emoticon')",
               properties: {
-                code: { type: "string", description: "Unicode emoji code (hex, without U+). Example: '1f60a' for 😊" }
-              }
-            }
+                code: {
+                  type: "string",
+                  description:
+                    "Unicode emoji code (hex, without U+). Example: '1f60a' for 😊",
+                },
+              },
+            },
           },
-          required: ["text"]
-        }
+          required: ["text"],
+        },
       },
       notifyAll: {
         type: "boolean",
-        description: "Whether to notify all assignees. Default is false."
+        description: "Whether to notify all assignees. Default is false.",
       },
       assignee: {
         type: "number",
-        description: "Optional user ID to assign the comment to."
-      }
+        description: "Optional user ID to assign the comment to.",
+      },
     },
-    oneOf: [
-      { required: ["commentText"] },
-      { required: ["richComment"] }
-    ]
-  }
+    oneOf: [{ required: ["commentText"] }, { required: ["richComment"] }],
+  },
 };
 
 /**
@@ -549,16 +612,19 @@ export const deleteTaskTool = {
     properties: {
       taskId: {
         type: "string",
-        description: "ID of task to delete (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456')."
+        description:
+          "ID of task to delete (preferred). Automatically detects and handles both regular task IDs (9 characters) and custom IDs (like 'DEV-1234', 'PROJ-456').",
       },
       taskName: {
         type: "string",
-        description: "Name of task to delete. The tool will search for tasks with this name across all lists unless listName is specified."
+        description:
+          "Name of task to delete. The tool will search for tasks with this name across all lists unless listName is specified.",
       },
       listName: {
         type: "string",
-        description: "Optional: Name of list containing the task. Providing this narrows the search to a specific list, improving performance and reducing ambiguity."
-      }
-    }
-  }
-}; 
+        description:
+          "Optional: Name of list containing the task. Providing this narrows the search to a specific list, improving performance and reducing ambiguity.",
+      },
+    },
+  },
+};

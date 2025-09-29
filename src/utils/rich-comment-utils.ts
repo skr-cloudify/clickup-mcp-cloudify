@@ -13,17 +13,17 @@
  */
 export interface RichTextSegment {
   text: string;
-  type?: 'text' | 'tag' | 'emoticon';
+  type?: "text" | "tag" | "emoticon";
   attributes?: {
     bold?: boolean;
     italic?: boolean;
     code?: boolean;
     link?: string;
-    'code-block'?: {
-      'code-block': string;
+    "code-block"?: {
+      "code-block": string;
     };
     list?: {
-      list: 'bullet' | 'ordered' | 'checked' | 'unchecked';
+      list: "bullet" | "ordered" | "checked" | "unchecked";
     };
   };
   user?: {
@@ -36,7 +36,7 @@ export interface RichTextSegment {
 
 /**
  * Rich Comment Builder Class
- * 
+ *
  * Provides a fluent API for building rich text comments
  */
 export class RichCommentBuilder {
@@ -56,7 +56,7 @@ export class RichCommentBuilder {
   bold(content: string): RichCommentBuilder {
     this.segments.push({
       text: content,
-      attributes: { bold: true }
+      attributes: { bold: true },
     });
     return this;
   }
@@ -67,7 +67,7 @@ export class RichCommentBuilder {
   italic(content: string): RichCommentBuilder {
     this.segments.push({
       text: content,
-      attributes: { italic: true }
+      attributes: { italic: true },
     });
     return this;
   }
@@ -78,7 +78,7 @@ export class RichCommentBuilder {
   code(content: string): RichCommentBuilder {
     this.segments.push({
       text: content,
-      attributes: { code: true }
+      attributes: { code: true },
     });
     return this;
   }
@@ -89,7 +89,7 @@ export class RichCommentBuilder {
   link(content: string, url: string): RichCommentBuilder {
     this.segments.push({
       text: content,
-      attributes: { link: url }
+      attributes: { link: url },
     });
     return this;
   }
@@ -98,22 +98,22 @@ export class RichCommentBuilder {
    * Add a line break
    */
   lineBreak(): RichCommentBuilder {
-    this.segments.push({ text: '\n' });
+    this.segments.push({ text: "\n" });
     return this;
   }
 
   /**
    * Start a code block
    */
-  codeBlock(content: string, language: string = 'plain'): RichCommentBuilder {
+  codeBlock(content: string, language: string = "plain"): RichCommentBuilder {
     this.segments.push({ text: content });
     this.segments.push({
-      text: '\n',
+      text: "\n",
       attributes: {
-        'code-block': {
-          'code-block': language
-        }
-      }
+        "code-block": {
+          "code-block": language,
+        },
+      },
     });
     return this;
   }
@@ -124,10 +124,10 @@ export class RichCommentBuilder {
   bulletItem(content: string): RichCommentBuilder {
     this.segments.push({ text: content });
     this.segments.push({
-      text: '\n',
+      text: "\n",
       attributes: {
-        list: { list: 'bullet' }
-      }
+        list: { list: "bullet" },
+      },
     });
     return this;
   }
@@ -138,10 +138,10 @@ export class RichCommentBuilder {
   numberedItem(content: string): RichCommentBuilder {
     this.segments.push({ text: content });
     this.segments.push({
-      text: '\n',
+      text: "\n",
       attributes: {
-        list: { list: 'ordered' }
-      }
+        list: { list: "ordered" },
+      },
     });
     return this;
   }
@@ -152,10 +152,10 @@ export class RichCommentBuilder {
   checklistItem(content: string, checked: boolean = false): RichCommentBuilder {
     this.segments.push({ text: content });
     this.segments.push({
-      text: '\n',
+      text: "\n",
       attributes: {
-        list: { list: checked ? 'checked' : 'unchecked' }
-      }
+        list: { list: checked ? "checked" : "unchecked" },
+      },
     });
     return this;
   }
@@ -166,8 +166,8 @@ export class RichCommentBuilder {
   emoji(unicodeCode: string): RichCommentBuilder {
     this.segments.push({
       text: `U${unicodeCode.toUpperCase()}`,
-      type: 'emoticon',
-      emoticon: { code: unicodeCode.toLowerCase() }
+      type: "emoticon",
+      emoticon: { code: unicodeCode.toLowerCase() },
     });
     return this;
   }
@@ -178,8 +178,8 @@ export class RichCommentBuilder {
   mention(userId: number, displayText?: string): RichCommentBuilder {
     this.segments.push({
       text: displayText || `@user${userId}`,
-      type: 'tag',
-      user: { id: userId }
+      type: "tag",
+      user: { id: userId },
     });
     return this;
   }
@@ -207,7 +207,10 @@ export class RichCommentHelpers {
   /**
    * Create a simple formatted comment with bold title and description
    */
-  static titleAndDescription(title: string, description: string): RichTextSegment[] {
+  static titleAndDescription(
+    title: string,
+    description: string
+  ): RichTextSegment[] {
     return new RichCommentBuilder()
       .bold(title)
       .lineBreak()
@@ -218,54 +221,64 @@ export class RichCommentHelpers {
   /**
    * Create a code block comment
    */
-  static codeBlock(code: string, language: string = 'javascript'): RichTextSegment[] {
-    return new RichCommentBuilder()
-      .codeBlock(code, language)
-      .build();
+  static codeBlock(
+    code: string,
+    language: string = "javascript"
+  ): RichTextSegment[] {
+    return new RichCommentBuilder().codeBlock(code, language).build();
   }
 
   /**
    * Create a task list comment
    */
-  static taskList(tasks: Array<{ text: string; completed?: boolean }>): RichTextSegment[] {
+  static taskList(
+    tasks: Array<{ text: string; completed?: boolean }>
+  ): RichTextSegment[] {
     const builder = new RichCommentBuilder();
-    
-    tasks.forEach(task => {
+
+    tasks.forEach((task) => {
       builder.checklistItem(task.text, task.completed || false);
     });
-    
+
     return builder.build();
   }
 
   /**
    * Create a comment with @mentions
    */
-  static withMentions(text: string, mentions: Array<{ userId: number; displayName?: string }>): RichTextSegment[] {
+  static withMentions(
+    text: string,
+    mentions: Array<{ userId: number; displayName?: string }>
+  ): RichTextSegment[] {
     const builder = new RichCommentBuilder().text(text);
-    
-    mentions.forEach(mention => {
-      builder.text(' ').mention(mention.userId, mention.displayName);
+
+    mentions.forEach((mention) => {
+      builder.text(" ").mention(mention.userId, mention.displayName);
     });
-    
+
     return builder.build();
   }
 
   /**
    * Create a status update comment
    */
-  static statusUpdate(status: string, details?: string, emoji?: string): RichTextSegment[] {
+  static statusUpdate(
+    status: string,
+    details?: string,
+    emoji?: string
+  ): RichTextSegment[] {
     const builder = new RichCommentBuilder();
-    
+
     if (emoji) {
-      builder.emoji(emoji).text(' ');
+      builder.emoji(emoji).text(" ");
     }
-    
+
     builder.bold(`Status: ${status}`);
-    
+
     if (details) {
       builder.lineBreak().text(details);
     }
-    
+
     return builder.build();
   }
 }
@@ -281,7 +294,7 @@ export const RICH_COMMENT_EXAMPLES = {
     { text: " and this is " },
     { text: "italic text", attributes: { italic: true } },
     { text: " and " },
-    { text: "inline code", attributes: { code: true } }
+    { text: "inline code", attributes: { code: true } },
   ],
 
   // Code block
@@ -292,9 +305,9 @@ export const RICH_COMMENT_EXAMPLES = {
     {
       text: "\n",
       attributes: {
-        "code-block": { "code-block": "javascript" }
-      }
-    }
+        "code-block": { "code-block": "javascript" },
+      },
+    },
   ],
 
   // Lists
@@ -306,7 +319,7 @@ export const RICH_COMMENT_EXAMPLES = {
     { text: "Second item" },
     { text: "\n", attributes: { list: { list: "bullet" } } },
     { text: "Third item" },
-    { text: "\n", attributes: { list: { list: "bullet" } } }
+    { text: "\n", attributes: { list: { list: "bullet" } } },
   ],
 
   // Checklist
@@ -316,7 +329,7 @@ export const RICH_COMMENT_EXAMPLES = {
     { text: "Completed task" },
     { text: "\n", attributes: { list: { list: "checked" } } },
     { text: "Pending task" },
-    { text: "\n", attributes: { list: { list: "unchecked" } } }
+    { text: "\n", attributes: { list: { list: "unchecked" } } },
   ],
 
   // With emoji and mentions
@@ -325,15 +338,15 @@ export const RICH_COMMENT_EXAMPLES = {
     {
       text: "U0001F389",
       type: "emoticon",
-      emoticon: { code: "1f389" }
+      emoticon: { code: "1f389" },
     },
     { text: " Thanks to " },
     {
       text: "@john",
       type: "tag",
-      user: { id: 12345 }
+      user: { id: 12345 },
     },
-    { text: " for the help!" }
+    { text: " for the help!" },
   ],
 
   // Link
@@ -341,8 +354,8 @@ export const RICH_COMMENT_EXAMPLES = {
     { text: "Check out the " },
     {
       text: "ClickUp API documentation",
-      attributes: { link: "https://clickup.com/api" }
+      attributes: { link: "https://clickup.com/api" },
     },
-    { text: " for more details." }
-  ]
+    { text: " for more details." },
+  ],
 };

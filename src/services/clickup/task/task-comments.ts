@@ -12,8 +12,8 @@
  * Only depends on TaskServiceCore for base functionality.
  */
 
-import { TaskServiceCore } from './task-core.js';
-import { ClickUpComment } from '../types.js';
+import { TaskServiceCore } from "./task-core.js";
+import { ClickUpComment } from "../types.js";
 
 /**
  * Comments functionality for the TaskService
@@ -25,26 +25,36 @@ export class TaskServiceComments {
   constructor(private core: TaskServiceCore) {}
   /**
    * Get all comments for a task
-   * 
+   *
    * @param taskId ID of the task to get comments for
    * @param start Optional pagination start
    * @param startId Optional comment ID to start from
    * @returns Array of task comments
    */
-  async getTaskComments(taskId: string, start?: number, startId?: string): Promise<ClickUpComment[]> {
-    (this.core as any).logOperation('getTaskComments', { taskId, start, startId });
+  async getTaskComments(
+    taskId: string,
+    start?: number,
+    startId?: string
+  ): Promise<ClickUpComment[]> {
+    (this.core as any).logOperation("getTaskComments", {
+      taskId,
+      start,
+      startId,
+    });
 
     try {
       // Build query parameters for pagination
       const queryParams = new URLSearchParams();
       if (start !== undefined) {
-        queryParams.append('start', start.toString());
+        queryParams.append("start", start.toString());
       }
       if (startId) {
-        queryParams.append('start_id', startId);
+        queryParams.append("start_id", startId);
       }
 
-      const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+      const queryString = queryParams.toString()
+        ? `?${queryParams.toString()}`
+        : "";
 
       return await (this.core as any).makeRequest(async () => {
         const response = await (this.core as any).client.get(
@@ -53,13 +63,16 @@ export class TaskServiceComments {
         return response.data.comments || [];
       });
     } catch (error) {
-      throw (this.core as any).handleError(error, 'Failed to get task comments');
+      throw (this.core as any).handleError(
+        error,
+        "Failed to get task comments"
+      );
     }
   }
 
   /**
    * Create a comment on a task
-   * 
+   *
    * @param taskId ID of the task to comment on
    * @param commentText Text content of the comment
    * @param notifyAll Whether to notify all assignees
@@ -73,7 +86,13 @@ export class TaskServiceComments {
     assignee?: number | null,
     richComment?: any[]
   ): Promise<ClickUpComment> {
-    (this.core as any).logOperation('createTaskComment', { taskId, commentText, richComment, notifyAll, assignee });
+    (this.core as any).logOperation("createTaskComment", {
+      taskId,
+      commentText,
+      richComment,
+      notifyAll,
+      assignee,
+    });
 
     try {
       const payload: {
@@ -82,7 +101,7 @@ export class TaskServiceComments {
         notify_all: boolean;
         assignee?: number;
       } = {
-        notify_all: notifyAll
+        notify_all: notifyAll,
       };
 
       // Use rich comment format if provided, otherwise fall back to plain text
@@ -91,7 +110,7 @@ export class TaskServiceComments {
       } else if (commentText) {
         payload.comment_text = commentText;
       } else {
-        throw new Error('Either commentText or richComment must be provided');
+        throw new Error("Either commentText or richComment must be provided");
       }
 
       if (assignee) {
@@ -103,13 +122,16 @@ export class TaskServiceComments {
         `/task/${taskId}/comment`,
         payload
       );
-      
+
       // Handle different response formats from ClickUp API
       if (response.data) {
         if (response.data.comment) {
           // Standard format: { comment: ClickUpComment }
           return response.data.comment;
-        } else if (response.data.id && (response.data.comment_text || response.data.comment)) {
+        } else if (
+          response.data.id &&
+          (response.data.comment_text || response.data.comment)
+        ) {
           // Direct format: the comment object itself
           return response.data as ClickUpComment;
         } else {
@@ -118,14 +140,19 @@ export class TaskServiceComments {
             id: response.data.id || `custom-${Date.now()}`,
             comment: response.data.comment || commentText,
             comment_text: response.data.comment_text || commentText,
-            user: response.data.user || { id: 0, username: 'Unknown', email: '', color: '' },
+            user: response.data.user || {
+              id: 0,
+              username: "Unknown",
+              email: "",
+              color: "",
+            },
             date: response.data.date || new Date().toISOString(),
-            resolved: false
+            resolved: false,
           } as ClickUpComment;
         }
       }
-      
-      throw new Error('Invalid response from ClickUp API');
+
+      throw new Error("Invalid response from ClickUp API");
     } catch (error: any) {
       // Check if comment might have been created despite error
       if (error.response?.status === 200 || error.response?.status === 201) {
@@ -133,15 +160,17 @@ export class TaskServiceComments {
         return {
           id: `fallback-${Date.now()}`,
           comment: commentText,
-          comment_text: commentText, 
-          user: { id: 0, username: 'Unknown', email: '', color: '' },
+          comment_text: commentText,
+          user: { id: 0, username: "Unknown", email: "", color: "" },
           date: new Date().toISOString(),
-          resolved: false
+          resolved: false,
         } as ClickUpComment;
       }
-      
-      throw (this.core as any).handleError(error, 'Failed to create task comment');
+
+      throw (this.core as any).handleError(
+        error,
+        "Failed to create task comment"
+      );
     }
   }
 }
-
